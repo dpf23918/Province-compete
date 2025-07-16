@@ -2,6 +2,7 @@
 #include "PID.h"
 #include "Encoder.h"
 #include "grey.h"
+#include "Motor.h"
 //左轮和右轮的PID实例
  PID_t Left_Inner;
  PID_t Right_Inner;
@@ -11,7 +12,7 @@ extern int err;//灰度传感器的偏差值
 float Speed_Kp=0.8;
 float Speed_Ki=0.13;
 float Speed_Kd=0;
-float BaseSpeed=15;
+int BaseSpeed=10;
 int Speed_Maxsize=100;
 int Speed_Minsize=0;
 
@@ -60,11 +61,12 @@ void Speed_PID_Init(PID_t *p)
 void Record_grey_PID(void)
 {   LineWalking();
 	Serial.printf("err:%d\n", err);
-	Left_Inner.Actual = Encoder_Get1();
-	Right_Inner.Actual = Encoder_Get2();
+	Left_Inner.Actual = Speed_Left_Encoder() ;
+	Right_Inner.Actual = Speed_Right_Encoder();
 	Left_Inner.Target = BaseSpeed + err;  // 左轮目标速度
 	Right_Inner.Target = BaseSpeed - err; // 右轮目标速度
 	PID_Update(&Left_Inner);
     PID_Update(&Right_Inner);
+	Motor_Control(Left_Inner.Out, Right_Inner.Out);
 	Serial.printf("Left_Inner.Target:%f,Right_Inner.Target:%f\n", Left_Inner.Target, Right_Inner.Target);
 }
